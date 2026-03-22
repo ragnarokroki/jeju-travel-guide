@@ -19,11 +19,27 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .stat{text-align:center;}
 .stat-num{font-family:'Playfair Display',serif;font-size:2rem;color:#A7FFEB;font-weight:700;line-height:1;}
 .stat-label{font-size:11px;color:rgba(255,255,255,0.6);letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
-.toolbar{position:sticky;top:0;z-index:100;background:rgba(250,248,243,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;}
-.search-wrap{position:relative;flex:0 1 160px;min-width:100px;max-width:160px;}
+
+/* ── toolbar: 중앙 정렬, 검색창 절반 크기 ── */
+.toolbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(250,248,243,0.95);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:14px 24px;
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  justify-content:center;          /* 중앙 정렬 */
+}
+.search-wrap{
+  position:relative;
+  min-width:120px;
+  max-width:160px;   /* 절반 크기 */
+  flex:0 1 160px;    /* 고정 크기 */
+}
 .search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);}
 #search{width:100%;padding:9px 12px 9px 36px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--ink);outline:none;transition:border-color .2s;}
 #search:focus{border-color:var(--jeju);}
+
+/* filter-group: 버튼들 + count-badge를 한 그룹으로 */
 .filter-group{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .filter-btn{padding:7px 14px;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;border:1.5px solid var(--border);background:#fff;cursor:pointer;transition:all .2s;white-space:nowrap;color:var(--muted);}
 .filter-btn:hover{border-color:var(--jeju);color:var(--jeju);}
@@ -32,7 +48,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .filter-btn[data-region="서부"].active{background:var(--west);border-color:var(--west);}
 .filter-btn[data-region="남부"].active{background:var(--south);border-color:var(--south);}
 .filter-btn[data-region="동부"].active{background:var(--east);border-color:var(--east);}
-.count-badge{font-size:13px;color:var(--muted);white-space:nowrap;}
+
+/* count-badge: 문화시설 버튼 바로 뒤, 좌측 여백 약 8px(gap으로 처리) */
+.count-badge{font-size:13px;color:var(--muted);white-space:nowrap;margin-left:4px;}
+
 .main{max-width:1280px;margin:0 auto;padding:40px 24px 80px;}
 .region-section{margin-bottom:60px;}
 .region-header{display:flex;align-items:center;gap:16px;margin-bottom:28px;padding-bottom:16px;border-bottom:2px solid var(--border);}
@@ -93,6 +112,8 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-si
     <div class="stat"><div class="stat-num">90</div><div class="stat-label">문화시설</div></div>
   </div>
 </div>
+
+<!-- toolbar: 검색창 + 필터 버튼 + count-badge 한 줄 중앙 정렬 -->
 <div class="toolbar">
   <div class="search-wrap">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -106,9 +127,12 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-si
     <button class="filter-btn" data-region="동부">동부</button>
     <button class="filter-btn" data-cat="관광지">관광지</button>
     <button class="filter-btn" data-cat="문화시설">문화시설</button>
+    <!-- count-badge를 filter-group 안으로 이동 → 문화시설 버튼 바로 옆 -->
     <span class="count-badge" id="count-badge">556곳</span>
   </div>
-<div style="margin:0 auto 28px; max-width:560px; background:#ffffff; border:1px solid #000000; border-radius:12px; padding:16px 20px; text-align:left;">
+</div>
+
+<div style="margin:12px auto 0; max-width:860px; background:#ffffff; border:1px solid #000000; border-radius:12px; padding:16px 20px; text-align:left;">
   <p style="color:#000000; font-size:13px; line-height:1.9; margin:0;">
     <strong style="color:#00695C;">지역 필터</strong> — 제주시 · 서부 · 남부 · 동부 버튼으로 지역별 장소를 확인하세요.<br>
     <strong style="color:#00695C;">검색</strong> — 장소명, 주소, 키워드로 빠르게 찾을 수 있습니다.<br>
@@ -117,7 +141,6 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-si
   </p>
 </div>
 
-</div>
 <div class="main" id="main-content"></div>
 <div class="empty" id="empty-state">
   <div class="empty-icon">🗺️</div>
