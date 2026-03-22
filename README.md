@@ -6,7 +6,9 @@
 ** https://ragnarokroki.github.io/jeju-travel-guide/index.html **
 
 create by me
-start date 26.3.21.
+1. start date 26.3.21.
+2. update 26.3.22.
+
 
 텍스트 데이터 및 기타 자료 출처 : 한국관광콘텐츠랩
 https://api.visitkorea.or.kr/
