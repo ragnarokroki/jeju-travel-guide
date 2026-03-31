@@ -11,7 +11,7 @@ create by me
 3. Design Improvements 26.03.30.
 4. Add Features 26.03.30.
 5. favorite and copy paste add, navigate change 26.03.31.
-6. error resolve 26.03.31.
+6. error resolve and design changes 26.03.31.
 
 
 텍스트 데이터 및 기타 자료 출처 : 한국관광콘텐츠랩
