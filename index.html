@@ -119,6 +119,44 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .info-val{color:#4B5563;line-height:1.5;}
 .map-link{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:8px 16px;border-radius:8px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-size:13px;font-weight:500;text-decoration:none;transition:background .2s;}
 .map-link:hover{background:#dcfce7;}
+
+/* ── 즐겨찾기 ── */
+.fav-btn{position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;font-size:20px;line-height:1;z-index:2;transition:transform .2s;}
+.fav-btn:hover{transform:scale(1.3);}
+.card{position:relative;}
+.fav-bar{display:flex;align-items:center;gap:8px;padding:8px 14px 0;}
+.fav-bar-label{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:0.5px;}
+.fav-count{background:var(--jeju);color:#fff;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;}
+/* ── 카드 제목 복사 버튼 ── */
+.copy-title-btn{display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:3px 8px;border-radius:6px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;font-size:10px;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .15s;}
+.copy-title-btn:hover{background:#e5e7eb;color:var(--ink);}
+.copy-title-btn.copied{background:#D1FAE5;border-color:#6EE7B7;color:#065F46;}
+/* ── 모달 복사/즐겨찾기 버튼 ── */
+.modal-action-bar{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+.modal-copy-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;background:#f3f4f6;border:1px solid #e5e7eb;color:var(--ink);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s;}
+.modal-copy-btn:hover{background:#e5e7eb;}
+.modal-copy-btn.copied{background:#D1FAE5;border-color:#6EE7B7;color:#065F46;}
+.modal-fav-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;background:#FFF7ED;border:1px solid #FDBA74;color:#9A3412;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s;}
+.modal-fav-btn.active{background:#FEF3C7;border-color:#F59E0B;color:#92400E;}
+.modal-fav-btn:hover{background:#FEE2E2;}
+/* 즐겨찾기 패널 오버레이 */
+.fav-panel{position:fixed;top:0;right:-360px;width:340px;height:100vh;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.15);z-index:300;transition:right .3s ease;overflow-y:auto;padding:20px;}
+.fav-panel.open{right:0;}
+.fav-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.fav-panel-title{font-family:'Noto Serif KR',serif;font-size:1.1rem;font-weight:700;}
+.fav-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);}
+.fav-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f3f4f6;}
+.fav-item-num{min-width:28px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;}
+.fav-item-name{font-size:13px;font-weight:600;flex:1;cursor:pointer;color:var(--ink);}
+.fav-item-name:hover{color:var(--jeju);}
+.fav-item-del{background:none;border:none;font-size:16px;cursor:pointer;color:#d1d5db;flex-shrink:0;}
+.fav-item-del:hover{color:#ef4444;}
+.fav-empty{text-align:center;padding:40px 0;color:var(--muted);font-size:13px;}
+/* 즐겨찾기 토글 버튼 (툴바) */
+.fav-toggle-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;border:1.5px solid var(--border);background:#fff;cursor:pointer;transition:all .2s;white-space:nowrap;color:var(--muted);}
+.fav-toggle-btn:hover,.fav-toggle-btn.has-fav{border-color:#F59E0B;color:#92400E;}
+.fav-overlay{position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:290;display:none;}
+.fav-overlay.open{display:block;}
 footer{text-align:center;padding:28px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);}
 </style>
 </head>
@@ -158,6 +196,7 @@ footer{text-align:center;padding:28px;border-top:1px solid var(--border);font-si
     <button class="filter-btn" data-free="1">🎫 무료입장</button>
   </div>
   <span class="count-badge" id="count-badge">556곳</span>
+  <button class="fav-toggle-btn" id="fav-toggle-btn" onclick="toggleFavPanel()">⭐ 즐겨찾기 <span id="fav-count-badge" style="display:none;background:#F59E0B;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;"></span></button>
 </div>
 
 <div class="guide-box" style="padding:14px 20px;">
@@ -187,6 +226,10 @@ footer{text-align:center;padding:28px;border-top:1px solid var(--border);font-si
     <div class="modal-body">
       <p class="modal-desc" id="m-desc"></p>
       <div class="modal-info-grid" id="m-info"></div>
+      <div class="modal-action-bar">
+        <button class="modal-copy-btn" id="m-copy-btn" onclick="copyModalTitle()">📋 제목 복사</button>
+        <button class="modal-fav-btn" id="m-fav-btn" onclick="toggleModalFav()">☆ 즐겨찾기 추가</button>
+      </div>
       <a id="m-map" class="map-link" target="_blank" href="#">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
         네이버 지도에서 보기
@@ -200,7 +243,17 @@ footer{text-align:center;padding:28px;border-top:1px solid var(--border);font-si
   Jeju Island Complete Travel Guide · 556 Places
 </footer>
 
+
+<div class="fav-overlay" id="fav-overlay" onclick="closeFavPanel()"></div>
+<div class="fav-panel" id="fav-panel">
+  <div class="fav-panel-header">
+    <div class="fav-panel-title">⭐ 즐겨찾기</div>
+    <button class="fav-close" onclick="closeFavPanel()">×</button>
+  </div>
+  <div id="fav-list"></div>
+</div>
 <script>
+let FAV=new Set();
 const RC={'제주시':'#1565C0','서부':'#2E7D32','남부':'#BF360C','동부':'#6A1B9A'};
 const RE={'제주시':'Jeju City','서부':'West','남부':'South','동부':'East'};
 const RO=['제주시','서부','남부','동부'];
@@ -236,13 +289,17 @@ function cardHtml(p){
   const freeBadge=isFree(p)?'<span class="badge-free">무료</span>':'';
   const hh=p.hours?`<div class="card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>${p.hours}</span></div>`:'';
   const fh=(!isFree(p)&&p.fee)?`<div class="card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>${p.fee}</span></div>`:'';
-  return `<div class="card" onclick="openModal(${p.no})">
+  const favIcon=FAV.has(p.no)?'⭐':'☆';
+  return `<div class="card">
+    <button class="fav-btn" onclick="event.stopPropagation();toggleFav(${p.no})" id="fav-btn-${p.no}" title="즐겨찾기">${favIcon}</button>
+    <div onclick="openModal(${p.no})" style="flex:1;display:flex;flex-direction:column;cursor:pointer;">
     <div class="card-accent" style="background:${c}"></div>
     <div class="card-body">
       <div class="card-top">
         <div class="card-num" style="background:${c}">${regionLabel(p.region)}${p.no}</div>
         <div style="flex:1">
           <div class="card-name">${p.name}</div>
+          <button class="copy-title-btn" onclick="event.stopPropagation();copyTitle(this,'${p.name.replace(/'/g,"&#39;")}')" title="제목 복사">📋 복사</button>
           <div class="card-badges"><span class="card-cat ${cc}">${p.category}</span>${freeBadge}</div>
         </div>
       </div>
@@ -252,7 +309,8 @@ function cardHtml(p){
         ${hh}${fh}
       </div>
     </div>
-  </div>`;}
+  </div>`;
+}
 
 function renderPagination(total){
   const totalPages=Math.ceil(total/PAGE_SIZE);
@@ -326,12 +384,99 @@ function openModal(no){
   if(p.hours)info+=`<div class="modal-info-row"><span class="info-label">운영시간</span><span class="info-val">${p.hours}</span></div>`;
   if(p.fee)info+=`<div class="modal-info-row"><span class="info-label">입장료</span><span class="info-val">${p.fee}</span></div>`;
   document.getElementById('m-info').innerHTML=info;
-  document.getElementById('m-map').href=`https://map.naver.com/v5/search/${encodeURIComponent(p.name+' '+p.address)}`;
+  document.getElementById('m-map').href=`https://map.naver.com/v5/search/${encodeURIComponent(p.name)}`;
   document.getElementById('overlay').classList.add('open');
   document.body.style.overflow='hidden';
+  window._curModalNo=p.no;
+  const fb=document.getElementById('m-fav-btn');
+  if(FAV.has(p.no)){fb.textContent='⭐ 즐겨찾기 됨';fb.classList.add('active');}
+  else{fb.textContent='☆ 즐겨찾기 추가';fb.classList.remove('active');}
 }
 function closeModal(e){if(e.target===document.getElementById('overlay'))closeModalBtn();}
 function closeModalBtn(){document.getElementById('overlay').classList.remove('open');document.body.style.overflow='';}
+function copyTitle(btn, title) {
+  navigator.clipboard.writeText(title).then(()=>{
+    btn.textContent='✓ 복사됨';
+    btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='📋 복사';btn.classList.remove('copied');},1800);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=title;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    btn.textContent='✓ 복사됨';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='📋 복사';btn.classList.remove('copied');},1800);
+  });
+}
+
+function copyModalTitle(){
+  const name=document.getElementById('m-name').textContent;
+  const btn=document.getElementById('m-copy-btn');
+  navigator.clipboard.writeText(name).then(()=>{
+    btn.textContent='✓ 복사됨!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='📋 제목 복사';btn.classList.remove('copied');},1800);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=name;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    btn.textContent='✓ 복사됨!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='📋 제목 복사';btn.classList.remove('copied');},1800);
+  });
+}
+
+function toggleFav(no){
+  if(FAV.has(no)){FAV.delete(no);}
+  else{FAV.add(no);}
+  const btn=document.getElementById('fav-btn-'+no);
+  if(btn) btn.textContent=FAV.has(no)?'⭐':'☆';
+  updateFavBadge();
+  renderFavPanel();
+}
+
+function toggleModalFav(){
+  const no=window._curModalNo;if(!no)return;
+  toggleFav(no);
+  const fb=document.getElementById('m-fav-btn');
+  if(FAV.has(no)){fb.textContent='⭐ 즐겨찾기 됨';fb.classList.add('active');}
+  else{fb.textContent='☆ 즐겨찾기 추가';fb.classList.remove('active');}
+}
+
+function updateFavBadge(){
+  const badge=document.getElementById('fav-count-badge');
+  const btn=document.getElementById('fav-toggle-btn');
+  if(FAV.size>0){
+    badge.textContent=FAV.size;badge.style.display='inline';
+    btn.classList.add('has-fav');
+  } else {
+    badge.style.display='none';
+    btn.classList.remove('has-fav');
+  }
+}
+
+function toggleFavPanel(){
+  document.getElementById('fav-panel').classList.toggle('open');
+  document.getElementById('fav-overlay').classList.toggle('open');
+  renderFavPanel();
+}
+function closeFavPanel(){
+  document.getElementById('fav-panel').classList.remove('open');
+  document.getElementById('fav-overlay').classList.remove('open');
+}
+
+function renderFavPanel(){
+  const list=document.getElementById('fav-list');
+  if(FAV.size===0){list.innerHTML='<div class="fav-empty">아직 즐겨찾기한 장소가 없습니다.<br>카드의 ☆ 버튼을 눌러 추가하세요.</div>';return;}
+  const items=[...FAV].map(no=>{
+    const p=PLACES.find(x=>x.no===no);if(!p)return '';
+    const c=rc(p.region);
+    return `<div class="fav-item">
+      <div class="fav-item-num" style="background:${c}">${p.no}</div>
+      <div class="fav-item-name" onclick="closeFavPanel();openModal(${p.no})">${p.name}</div>
+      <button class="fav-item-del" onclick="toggleFav(${p.no});renderFavPanel()" title="삭제">✕</button>
+    </div>`;
+  }).join('');
+  list.innerHTML=items;
+}
+
 
 document.querySelectorAll('.filter-btn[data-region]').forEach(btn=>{
   btn.addEventListener('click',()=>{
