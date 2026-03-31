@@ -302,9 +302,12 @@ function cardHtml(p){
   const cc=p.category==='관광지'?'cat-spot':'cat-culture';
   const ce=p.category==='관광지'?'Sightseeing':'Culture';
   const freeBadge=isFree(p)?'<span class="badge-free">무료</span>':'';
+  
+  // 메타 정보 설정
   const hh=p.hours?`<div class="card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>${p.hours}</span></div>`:'';
   const fh=(!isFree(p)&&p.fee)?`<div class="card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>${p.fee}</span></div>`:'';
   const favIcon=FAV.has(p.no)?'⭐':'☆';
+
   return `<div class="card" style="min-width: 300px; flex-shrink: 0;">
     <button class="fav-btn" onclick="event.stopPropagation();toggleFav(${p.no})" id="fav-btn-${p.no}" title="즐겨찾기">${favIcon}</button>
     
@@ -315,8 +318,11 @@ function cardHtml(p){
           <div class="card-num" style="background:${c}">${regionLabel(p.region)}${p.no}</div>
           <div style="flex:1">
             <div class="card-name">${p.name}</div>
-            <button class="copy-title-btn" onclick="event.stopPropagation();copyTitle(this,'${p.name.replace(/'/g,"&#39;")}')" title="제목 복사">📋 복사</button>
-            <div class="card-badges"><span class="card-cat ${cc}">${p.category}</span>${freeBadge}</div>
+            <div class="card-badges">
+              <span class="card-cat ${cc}">${p.category}</span>
+              ${freeBadge}
+              <button class="copy-title-btn badge-copy" onclick="event.stopPropagation();copyTitle(this,'${p.name.replace(/'/g,"&#39;")}')" title="제목 복사">📋 복사</button>
+            </div>
           </div>
         </div>
         <p class="card-desc">${p.desc||'상세 정보를 확인하세요.'}</p>
