@@ -10,6 +10,7 @@ create by me
 2. update 26.3.22.
 3. Design Improvements 26.3.30.
 4. Add Features 26.3.30.
+5. favorite and copy paste add, navigate change
 
 텍스트 데이터 및 기타 자료 출처 : 한국관광콘텐츠랩
 https://api.visitkorea.or.kr/
