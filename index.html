@@ -447,27 +447,48 @@ function copyModalTitle(){
 }
 
 function toggleFav(no){
-  if(FAV.has(no)){FAV.delete(no);}
-  else{FAV.add(no);}
+  if(FAV.has(no)){
+    FAV.delete(no);
+  } else {
+    FAV.add(no);
+    // 추가했을 때 즐겨찾기 패널을 자동으로 열어줌
+    openFavPanel();
+  }
+  
+  // 변경된 즐겨찾기 목록을 브라우저에 저장 (새로고침 시 유지)
+  localStorage.setItem('jeju_favs', JSON.stringify(Array.from(FAV)));
+  
   const btn=document.getElementById('fav-btn-'+no);
   if(btn) btn.textContent=FAV.has(no)?'⭐':'☆';
+  
   updateFavBadge();
   renderFavPanel();
+  
+  // 메인 리스트가 다시 그려져야 별 모양이 유지되는 경우를 위해 render() 호출 (선택적)
+  // render(); 
 }
 
 function toggleModalFav(){
-  const no=window._curModalNo;if(!no)return;
+  const no=window._curModalNo; if(!no) return;
   toggleFav(no);
   const fb=document.getElementById('m-fav-btn');
-  if(FAV.has(no)){fb.textContent='⭐ 즐겨찾기 됨';fb.classList.add('active');}
-  else{fb.textContent='☆ 즐겨찾기 추가';fb.classList.remove('active');}
+  if(FAV.has(no)){
+    fb.textContent='⭐ 즐겨찾기 됨';
+    fb.classList.add('active');
+  } else {
+    fb.textContent='☆ 즐겨찾기 추가';
+    fb.classList.remove('active');
+  }
 }
 
 function updateFavBadge(){
   const badge=document.getElementById('fav-count-badge');
   const btn=document.getElementById('fav-toggle-btn');
-  if(FAV.size>0){
-    badge.textContent=FAV.size;badge.style.display='inline';
+  if(!badge || !btn) return;
+
+  if(FAV.size > 0){
+    badge.textContent=FAV.size;
+    badge.style.display='inline';
     btn.classList.add('has-fav');
   } else {
     badge.style.display='none';
@@ -475,21 +496,43 @@ function updateFavBadge(){
   }
 }
 
+// 클래스명을 'open'으로 통일하여 수정
 function toggleFavPanel(){
-  document.getElementById('fav-panel').classList.toggle('open');
-  document.getElementById('fav-overlay').classList.toggle('open');
+  const panel = document.getElementById('fav-panel');
+  const overlay = document.getElementById('fav-overlay');
+  if(panel.classList.contains('open')) {
+    closeFavPanel();
+  } else {
+    openFavPanel();
+  }
+}
+
+function openFavPanel() {
+  const panel = document.getElementById('fav-panel');
+  const overlay = document.getElementById('fav-overlay');
+  if (panel) panel.classList.add('open');
+  if (overlay) overlay.classList.add('open');
   renderFavPanel();
 }
+
 function closeFavPanel(){
-  document.getElementById('fav-panel').classList.remove('open');
-  document.getElementById('fav-overlay').classList.remove('open');
+  const panel = document.getElementById('fav-panel');
+  const overlay = document.getElementById('fav-overlay');
+  if (panel) panel.classList.remove('open');
+  if (overlay) overlay.classList.remove('open');
 }
 
 function renderFavPanel(){
   const list=document.getElementById('fav-list');
-  if(FAV.size===0){list.innerHTML='<div class="fav-empty">아직 즐겨찾기한 장소가 없습니다.<br>카드의 ☆ 버튼을 눌러 추가하세요.</div>';return;}
+  if(!list) return;
+
+  if(FAV.size===0){
+    list.innerHTML='<div class="fav-empty">아직 즐겨찾기한 장소가 없습니다.<br>카드의 ☆ 버튼을 눌러 추가하세요.</div>';
+    return;
+  }
+
   const items=[...FAV].map(no=>{
-    const p=PLACES.find(x=>x.no===no);if(!p)return '';
+    const p=PLACES.find(x=>x.no===no); if(!p) return '';
     const c=rc(p.region);
     return `<div class="fav-item">
       <div class="fav-item-num" style="background:${c}">${p.no}</div>
