@@ -40,7 +40,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 #search:focus{border-color:var(--jeju);}
 
 .divider{width:1px;height:24px;background:var(--border);flex-shrink:0;}
-.filter-scroll{display:flex;gap:6px;flex-shrink:0;align-items:center;}
+.filter-scroll{display:flex;gap:6px;flex-shrink:0;align-items:center;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .filter-btn{padding:6px 12px;border-radius:20px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;border:1.5px solid var(--border);background:#fff;cursor:pointer;transition:all .2s;white-space:nowrap;color:var(--muted);flex-shrink:0;}
 .filter-btn:hover{border-color:var(--jeju);color:var(--jeju);}
 .filter-btn.active{color:#fff;}
@@ -139,9 +139,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .modal-fav-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;background:#FFF7ED;border:1px solid #FDBA74;color:#9A3412;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s;}
 .modal-fav-btn.active{background:#FEF3C7;border-color:#F59E0B;color:#92400E;}
 .modal-fav-btn:hover{background:#FEE2E2;}
-/* 즐겨찾기 패널 오버레이 */
-.fav-panel{position:fixed;top:0;right:-360px;width:340px;height:100vh;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.15);z-index:1000;transition:right 0.3s ease;overflow-y:auto;padding:20px;visibility: hidden;}
-.fav-panel.open{right:0;visibility: visible; /* 열릴 때만 보이게 설정 */}
+/* ── 즐겨찾기 패널 (통합 단일 정의) ── */
+.fav-panel{
+  position:fixed;top:0;right:-340px;width:340px;height:100vh;
+  background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.15);
+  z-index:2000;transition:right 0.3s ease;
+  overflow-y:auto;padding:20px;
+  visibility:hidden;
+}
+.fav-panel.open{right:0;visibility:visible;}
+/* 즐겨찾기 패널 배경 오버레이 */
+.fav-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.3);z-index:1999;
+}
+.fav-overlay.open{display:block;}
 .fav-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .fav-panel-title{font-family:'Noto Serif KR',serif;font-size:1.1rem;font-weight:700;}
 .fav-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);}
@@ -155,23 +167,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 /* 즐겨찾기 토글 버튼 (툴바) */
 .fav-toggle-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;border:1.5px solid var(--border);background:#fff;cursor:pointer;transition:all .2s;white-space:nowrap;color:var(--muted);}
 .fav-toggle-btn:hover,.fav-toggle-btn.has-fav{border-color:#F59E0B;color:#92400E;}
-.fav-panel {
-  position: fixed;
-  top: 0;
-  right: -340px; /* 너비와 일치시킴 */
-  width: 340px;
-  height: 100vh;
-  background: #fff;
-  box-shadow: -4px 0 24px rgba(0,0,0,.15);
-  z-index: 2000; /* 확실하게 최상단으로 올림 */
-  transition: transform 0.3s ease, right 0.3s ease;
-  overflow-y: auto;
-  padding: 20px;
-  
-  /* 핵심 수정: 레이아웃 간섭 원천 차단 */
-  display: none; 
+/* ── 토스트 알림 ── */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:#1A1A1A;color:#fff;font-size:13px;padding:10px 20px;
+  border-radius:24px;z-index:3000;opacity:0;
+  transition:opacity 0.25s,transform 0.25s;pointer-events:none;white-space:nowrap;
 }
-.fav-overlay.open{display:block;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 footer{text-align:center;padding:28px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);}
 </style>
 </head>
@@ -185,30 +188,30 @@ footer{text-align:center;padding:28px;border-top:1px solid var(--border);font-si
   <h1>제주도 <em>완전정복</em></h1>
   <p class="hero-sub">관광지부터 문화시설까지, 제주의 모든 것을 담았습니다</p>
   <div class="hero-stats">
-    <div class="stat"><div class="stat-num">556</div><div class="stat-label">총 장소</div></div>
+    <div class="stat"><div class="stat-num" id="stat-total">556</div><div class="stat-label">총 장소</div></div>
     <div class="stat"><div class="stat-num">4</div><div class="stat-label">지역</div></div>
-    <div class="stat"><div class="stat-num">466</div><div class="stat-label">관광지</div></div>
-    <div class="stat"><div class="stat-num">90</div><div class="stat-label">문화시설</div></div>
+    <div class="stat"><div class="stat-num" id="stat-spots">466</div><div class="stat-label">관광지</div></div>
+    <div class="stat"><div class="stat-num" id="stat-cultures">90</div><div class="stat-label">문화시설</div></div>
   </div>
 </div>
 
 <div class="toolbar">
   <div class="search-wrap">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input type="text" id="search" placeholder="장소명 검색...">
+    <input type="text" id="search" placeholder="장소명 검색..." aria-label="장소명 검색">
   </div>
   <div class="divider"></div>
-  <div class="filter-scroll">
-    <button class="filter-btn active" data-region="전체">전체</button>
-    <button class="filter-btn" data-region="제주시">제주시</button>
-    <button class="filter-btn" data-region="서부">서부</button>
-    <button class="filter-btn" data-region="남부">남부</button>
-    <button class="filter-btn" data-region="동부">동부</button>
-    <div class="divider"></div>
-    <button class="filter-btn" data-cat="관광지">관광지</button>
-    <button class="filter-btn" data-cat="문화시설">문화시설</button>
-    <div class="divider"></div>
-    <button class="filter-btn" data-free="1">🎫 무료입장</button>
+  <div class="filter-scroll" role="group" aria-label="지역 및 카테고리 필터">
+    <button class="filter-btn active" data-region="전체" aria-pressed="true">전체</button>
+    <button class="filter-btn" data-region="제주시" aria-pressed="false">제주시</button>
+    <button class="filter-btn" data-region="서부" aria-pressed="false">서부</button>
+    <button class="filter-btn" data-region="남부" aria-pressed="false">남부</button>
+    <button class="filter-btn" data-region="동부" aria-pressed="false">동부</button>
+    <div class="divider" role="separator"></div>
+    <button class="filter-btn" data-cat="관광지" aria-pressed="false">관광지</button>
+    <button class="filter-btn" data-cat="문화시설" aria-pressed="false">문화시설</button>
+    <div class="divider" role="separator"></div>
+    <button class="filter-btn" data-free="1" aria-pressed="false">🎫 무료입장</button>
   </div>
   <span class="count-badge" id="count-badge">556곳</span>
   <button class="fav-toggle-btn" id="fav-toggle-btn" onclick="toggleFavPanel()">⭐ 즐겨찾기 <span id="fav-count-badge" style="display:none;background:#F59E0B;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;"></span></button>
@@ -230,10 +233,10 @@ footer{text-align:center;padding:28px;border-top:1px solid var(--border);font-si
   <p>다른 키워드나 필터를 사용해보세요</p>
 </div>
 
-<div class="overlay" id="overlay" onclick="closeModal(event)">
+<div class="overlay" id="overlay" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-labelledby="m-name">
   <div class="modal">
     <div class="modal-header">
-      <button class="close-btn" onclick="closeModalBtn()">×</button>
+      <button class="close-btn" onclick="closeModalBtn()" aria-label="모달 닫기">×</button>
       <div class="modal-num" id="m-num"></div>
       <div class="modal-name" id="m-name"></div>
       <div class="modal-tags" id="m-tags"></div>
@@ -260,13 +263,14 @@ footer{text-align:center;padding:28px;border-top:1px solid var(--border);font-si
 
 
 <div class="fav-overlay" id="fav-overlay" onclick="closeFavPanel()"></div>
-<div class="fav-panel" id="fav-panel">
+<div class="fav-panel" id="fav-panel" role="dialog" aria-modal="false" aria-label="즐겨찾기 목록">
   <div class="fav-panel-header">
     <div class="fav-panel-title">⭐ 즐겨찾기</div>
-    <button class="fav-close" onclick="closeFavPanel()">×</button>
+    <button class="fav-close" onclick="closeFavPanel()" aria-label="즐겨찾기 패널 닫기">×</button>
   </div>
   <div id="fav-list"></div>
 </div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script>
 let FAV=new Set();
 const RC={'제주시':'#1565C0','서부':'#2E7D32','남부':'#BF360C','동부':'#6A1B9A'};
@@ -300,34 +304,39 @@ function regionLabel(r){const m={'제주시':'제','서부':'서','남부':'남'
 function cardHtml(p){
   const c=rc(p.region);
   const cc=p.category==='관광지'?'cat-spot':'cat-culture';
-  const ce=p.category==='관광지'?'Sightseeing':'Culture';
   const freeBadge=isFree(p)?'<span class="badge-free">무료</span>':'';
-  
-  // 메타 정보 설정
-  const hh=p.hours?`<div class="card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>${p.hours}</span></div>`:'';
-  const fh=(!isFree(p)&&p.fee)?`<div class="card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>${p.fee}</span></div>`:'';
-  const favIcon=FAV.has(p.no)?'⭐':'☆';
+  const safeName=p.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const safeDesc=(p.desc||'상세 정보를 확인하세요.').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const safeAddr=(p.address||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const safeHours=(p.hours||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const safeFee=(p.fee||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  return `<div class="card" style="min-width: 300px; flex-shrink: 0;">
-    <button class="fav-btn" onclick="event.stopPropagation();toggleFav(${p.no})" id="fav-btn-${p.no}" title="즐겨찾기">${favIcon}</button>
+  // 메타 정보 설정
+  const hh=p.hours?`<div class="card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>${safeHours}</span></div>`:'';
+  const fh=(!isFree(p)&&p.fee)?`<div class="card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>${safeFee}</span></div>`:'';
+  const favIcon=FAV.has(p.no)?'⭐':'☆';
+  const favLabel=FAV.has(p.no)?'즐겨찾기 해제':'즐겨찾기 추가';
+
+  return `<div class="card">
+    <button class="fav-btn" onclick="event.stopPropagation();toggleFav(${p.no})" id="fav-btn-${p.no}" aria-label="${favLabel}: ${safeName}" aria-pressed="${FAV.has(p.no)}">${favIcon}</button>
     
-    <div onclick="openModal(${p.no})" style="flex:1;display:flex;flex-direction:column;cursor:pointer;">
+    <div onclick="openModal(${p.no})" style="flex:1;display:flex;flex-direction:column;cursor:pointer;" role="button" aria-label="${safeName} 상세 보기" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openModal(${p.no})">
       <div class="card-accent" style="background:${c}"></div>
       <div class="card-body">
         <div class="card-top">
           <div class="card-num" style="background:${c}">${regionLabel(p.region)}${p.no}</div>
           <div style="flex:1">
-            <div class="card-name">${p.name}</div>
+            <div class="card-name">${safeName}</div>
             <div class="card-badges">
-              <span class="card-cat ${cc}">${p.category}</span>
+              <span class="card-cat ${cc}">${esc(p.category)}</span>
               ${freeBadge}
-              <button class="copy-title-btn badge-copy" onclick="event.stopPropagation();copyTitle(this,'${p.name.replace(/'/g,"&#39;")}')" title="제목 복사">📋 복사</button>
+              <button class="copy-title-btn badge-copy" onclick="event.stopPropagation();copyTitle(this,'${safeName.replace(/'/g,'&#39;')}')" aria-label="${safeName} 제목 복사" title="제목 복사">📋 복사</button>
             </div>
           </div>
         </div>
-        <p class="card-desc">${p.desc||'상세 정보를 확인하세요.'}</p>
+        <p class="card-desc">${safeDesc}</p>
         <div class="card-footer">
-          <div class="card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>${p.address}</span></div>
+          <div class="card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>${safeAddr}</span></div>
           ${hh}${fh}
         </div>
       </div>
@@ -394,6 +403,10 @@ function selectRegion(reg){
   aR=reg; curPage=1; render(true);
 }
 
+function esc(str){
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function openModal(no){
   const p=PLACES.find(x=>x.no===no);if(!p)return;
   const c=rc(p.region);
@@ -401,71 +414,88 @@ function openModal(no){
   document.getElementById('m-num').textContent=p.no;
   document.getElementById('m-name').textContent=p.name;
   const freeBadge=isFree(p)?'<span class="modal-tag" style="background:#FEF3C7;color:#92400E">무료입장</span>':'';
-  document.getElementById('m-tags').innerHTML=`<span class="modal-tag" style="background:${c}20;color:${c}">${p.region}</span><span class="modal-tag ${p.category==='관광지'?'cat-spot':'cat-culture'}">${p.category}</span>${freeBadge}`;
+  document.getElementById('m-tags').innerHTML=`<span class="modal-tag" style="background:${c}20;color:${c}">${esc(p.region)}</span><span class="modal-tag ${p.category==='관광지'?'cat-spot':'cat-culture'}">${esc(p.category)}</span>${freeBadge}`;
   document.getElementById('m-desc').textContent=p.desc||'상세 정보를 확인하세요.';
-  let info=`<div class="modal-info-row"><span class="info-label">주소</span><span class="info-val">${p.address}</span></div>`;
-  if(p.hours)info+=`<div class="modal-info-row"><span class="info-label">운영시간</span><span class="info-val">${p.hours}</span></div>`;
-  if(p.fee)info+=`<div class="modal-info-row"><span class="info-label">입장료</span><span class="info-val">${p.fee}</span></div>`;
+  let info=`<div class="modal-info-row"><span class="info-label">주소</span><span class="info-val">${esc(p.address)}</span></div>`;
+  if(p.hours)info+=`<div class="modal-info-row"><span class="info-label">운영시간</span><span class="info-val">${esc(p.hours)}</span></div>`;
+  if(p.fee)info+=`<div class="modal-info-row"><span class="info-label">입장료</span><span class="info-val">${esc(p.fee)}</span></div>`;
   document.getElementById('m-info').innerHTML=info;
   document.getElementById('m-map').href=`https://map.naver.com/v5/search/${encodeURIComponent(p.name)}`;
-  document.getElementById('overlay').classList.add('open');
+  const overlay=document.getElementById('overlay');
+  overlay.classList.add('open');
   document.body.style.overflow='hidden';
   window._curModalNo=p.no;
+  // 모달 열릴 때 닫기 버튼으로 포커스 이동 (접근성)
+  setTimeout(()=>{
+    const closeBtn=overlay.querySelector('.close-btn');
+    if(closeBtn) closeBtn.focus();
+  },50);
   const fb=document.getElementById('m-fav-btn');
-  if(FAV.has(p.no)){fb.textContent='⭐ 즐겨찾기 됨';fb.classList.add('active');}
-  else{fb.textContent='☆ 즐겨찾기 추가';fb.classList.remove('active');}
+  if(FAV.has(p.no)){fb.textContent='⭐ 즐겨찾기 됨';fb.classList.add('active');fb.setAttribute('aria-pressed','true');}
+  else{fb.textContent='☆ 즐겨찾기 추가';fb.classList.remove('active');fb.setAttribute('aria-pressed','false');}
 }
 function closeModal(e){if(e.target===document.getElementById('overlay'))closeModalBtn();}
 function closeModalBtn(){document.getElementById('overlay').classList.remove('open');document.body.style.overflow='';}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  if(!t)return;
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
 function copyTitle(btn, title) {
+  if(!navigator.clipboard){
+    showToast('복사 기능을 지원하지 않는 브라우저입니다.');
+    return;
+  }
   navigator.clipboard.writeText(title).then(()=>{
     btn.textContent='✓ 복사됨';
     btn.classList.add('copied');
     setTimeout(()=>{btn.textContent='📋 복사';btn.classList.remove('copied');},1800);
   }).catch(()=>{
-    const ta=document.createElement('textarea');
-    ta.value=title;document.body.appendChild(ta);ta.select();
-    document.execCommand('copy');document.body.removeChild(ta);
-    btn.textContent='✓ 복사됨';btn.classList.add('copied');
-    setTimeout(()=>{btn.textContent='📋 복사';btn.classList.remove('copied');},1800);
+    showToast('복사에 실패했습니다. 직접 선택 후 복사해 주세요.');
   });
 }
 
 function copyModalTitle(){
   const name=document.getElementById('m-name').textContent;
   const btn=document.getElementById('m-copy-btn');
+  if(!navigator.clipboard){
+    showToast('복사 기능을 지원하지 않는 브라우저입니다.');
+    return;
+  }
   navigator.clipboard.writeText(name).then(()=>{
     btn.textContent='✓ 복사됨!';btn.classList.add('copied');
     setTimeout(()=>{btn.textContent='📋 제목 복사';btn.classList.remove('copied');},1800);
   }).catch(()=>{
-    const ta=document.createElement('textarea');
-    ta.value=name;document.body.appendChild(ta);ta.select();
-    document.execCommand('copy');document.body.removeChild(ta);
-    btn.textContent='✓ 복사됨!';btn.classList.add('copied');
-    setTimeout(()=>{btn.textContent='📋 제목 복사';btn.classList.remove('copied');},1800);
+    showToast('복사에 실패했습니다. 직접 선택 후 복사해 주세요.');
   });
 }
 
 function toggleFav(no){
   if(FAV.has(no)){
     FAV.delete(no);
+    showToast('즐겨찾기에서 제거했습니다.');
   } else {
     FAV.add(no);
-    // 추가했을 때 즐겨찾기 패널을 자동으로 열어줌
-    openFavPanel();
+    showToast('즐겨찾기에 추가했습니다. ⭐');
   }
-  
+
   // 변경된 즐겨찾기 목록을 브라우저에 저장 (새로고침 시 유지)
   localStorage.setItem('jeju_favs', JSON.stringify(Array.from(FAV)));
-  
+
   const btn=document.getElementById('fav-btn-'+no);
-  if(btn) btn.textContent=FAV.has(no)?'⭐':'☆';
-  
+  if(btn){
+    const isFaved=FAV.has(no);
+    btn.textContent=isFaved?'⭐':'☆';
+    btn.setAttribute('aria-pressed', isFaved?'true':'false');
+    const p=PLACES.find(x=>x.no===no);
+    if(p) btn.setAttribute('aria-label',(isFaved?'즐겨찾기 해제':'즐겨찾기 추가')+': '+p.name);
+  }
+
   updateFavBadge();
   renderFavPanel();
-  
-  // 메인 리스트가 다시 그려져야 별 모양이 유지되는 경우를 위해 render() 호출 (선택적)
-  // render(); 
 }
 
 function toggleModalFav(){
@@ -475,9 +505,11 @@ function toggleModalFav(){
   if(FAV.has(no)){
     fb.textContent='⭐ 즐겨찾기 됨';
     fb.classList.add('active');
+    fb.setAttribute('aria-pressed','true');
   } else {
     fb.textContent='☆ 즐겨찾기 추가';
     fb.classList.remove('active');
+    fb.setAttribute('aria-pressed','false');
   }
 }
 
@@ -546,29 +578,84 @@ function renderFavPanel(){
 
 document.querySelectorAll('.filter-btn[data-region]').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    document.querySelectorAll('.filter-btn[data-region]').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active'); aR=btn.dataset.region; curPage=1; render(true);
+    document.querySelectorAll('.filter-btn[data-region]').forEach(b=>{
+      b.classList.remove('active');
+      b.setAttribute('aria-pressed','false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-pressed','true');
+    aR=btn.dataset.region; curPage=1; render(true);
   });
 });
 document.querySelectorAll('.filter-btn[data-cat]').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    if(btn.classList.contains('active')){btn.classList.remove('active');aC='전체';}
-    else{document.querySelectorAll('.filter-btn[data-cat]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');aC=btn.dataset.cat;}
+    if(btn.classList.contains('active')){
+      btn.classList.remove('active');
+      btn.setAttribute('aria-pressed','false');
+      aC='전체';
+    } else {
+      document.querySelectorAll('.filter-btn[data-cat]').forEach(b=>{
+        b.classList.remove('active');
+        b.setAttribute('aria-pressed','false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed','true');
+      aC=btn.dataset.cat;
+    }
     curPage=1; render(true);
   });
 });
 document.querySelector('.filter-btn[data-free]').addEventListener('click',function(){
   aFree=!aFree;
   this.classList.toggle('active',aFree);
+  this.setAttribute('aria-pressed', aFree?'true':'false');
   curPage=1; render(true);
 });
-let timer;
-document.getElementById('search').addEventListener('input',e=>{
-  clearTimeout(timer);
-  timer=setTimeout(()=>{sQ=e.target.value.trim();curPage=1;render(true);},200);
+
+// Escape 키로 모달 및 즐겨찾기 패널 닫기
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    const overlay=document.getElementById('overlay');
+    const favPanel=document.getElementById('fav-panel');
+    if(overlay && overlay.classList.contains('open')) closeModalBtn();
+    else if(favPanel && favPanel.classList.contains('open')) closeFavPanel();
+  }
 });
 
+// 검색 디바운스 타이머 (명시적 이름 사용)
+let searchTimer;
+document.getElementById('search').addEventListener('input',e=>{
+  clearTimeout(searchTimer);
+  searchTimer=setTimeout(()=>{sQ=e.target.value.trim();curPage=1;render(true);},200);
+});
+
+// localStorage에서 즐겨찾기 복원
+try{
+  const saved=localStorage.getItem('jeju_favs');
+  if(saved){
+    const arr=JSON.parse(saved);
+    if(Array.isArray(arr)) arr.forEach(n=>FAV.add(n));
+  }
+}catch(e){}
+
+// 통계 수치 자동 계산 (하드코딩 제거)
+(function(){
+  const total=PLACES.length;
+  const spots=PLACES.filter(p=>p.category==='관광지').length;
+  const cultures=PLACES.filter(p=>p.category==='문화시설').length;
+  const elTotal=document.getElementById('stat-total');
+  const elSpots=document.getElementById('stat-spots');
+  const elCultures=document.getElementById('stat-cultures');
+  if(elTotal) elTotal.textContent=total;
+  if(elSpots) elSpots.textContent=spots;
+  if(elCultures) elCultures.textContent=cultures;
+  // footer 수치도 자동 갱신
+  const footer=document.querySelector('footer');
+  if(footer) footer.innerHTML=footer.innerHTML.replace(/\d+ Places/, total+' Places');
+})();
+
 render();
+updateFavBadge();
 </script>
 </body>
 </html>
