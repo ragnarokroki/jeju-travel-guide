@@ -14,6 +14,7 @@ create by me
 5. favorite and copy paste add, navigate change 26.03.31.
 6. error resolve and design changes 26.03.31.
 7. favorite popup recover 26.04.05
+8. card images select 26.04.05.
 
 
 텍스트 데이터 및 기타 자료 출처 : 한국관광콘텐츠랩
