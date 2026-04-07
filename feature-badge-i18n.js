@@ -107,20 +107,20 @@
   }
 
   function renderVisitBtn(no){
-    const v = getVisits();
-    const visited = v.has(no);
-    const existing = document.getElementById(`visit-btn-${no}`);
-    if(existing) existing.remove();
+  // 모달 액션바 내 모든 visit-btn 제거 후 재생성
+  document.querySelectorAll('.visit-btn').forEach(b => b.remove());
 
-    const btn = document.createElement('button');
-    btn.id = `visit-btn-${no}`;
-    btn.className = `visit-btn${visited?' visited':''}`;
-    btn.textContent = visited ? '✅ 다녀왔어요' : '📍 다녀왔어요';
-    btn.setAttribute('aria-label', (visited?'방문 취소':'방문 인증'));
-    btn.addEventListener('click', ()=> markVisit(no));
+  const v = getVisits();
+  const visited = v.has(no);
+  const btn = document.createElement('button');
+  btn.id = `visit-btn-${no}`;
+  btn.className = `visit-btn${visited?' visited':''}`;
+  btn.textContent = visited ? '✅ 다녀왔어요' : '📍 다녀왔어요';
+  btn.setAttribute('aria-label', visited ? '방문 취소' : '방문 인증');
+  btn.addEventListener('click', ()=> markVisit(no));
 
-    const actionBar = document.getElementById('m-fav-btn')?.parentElement;
-    if(actionBar) actionBar.appendChild(btn);
+  const actionBar = document.querySelector('.modal-action-bar');
+  if(actionBar) actionBar.appendChild(btn);
   }
 
   function showBadgePanel(){
