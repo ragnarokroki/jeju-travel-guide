@@ -15,6 +15,7 @@ create by me
 6. error resolve and design changes 26.03.31.
 7. favorite popup recover 26.04.05
 8. card images select 26.04.05.
+9. test uploads 26.04.07.
 
 
 텍스트 데이터 및 기타 자료 출처 : 한국관광콘텐츠랩
