@@ -18,7 +18,7 @@ create by me
 9. test uploads 26.04.07.
 10. source update "feature-badge-i18n" 26.04.08.
 11. source origin change "feature-badge-i18n.js" 26.04.08.
-
+12. source modify change "feature-badge-i18n.js" 26.04.08.
 
 텍스트 데이터 및 기타 자료 출처 : 한국관광콘텐츠랩
 https://api.visitkorea.or.kr/
